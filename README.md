@@ -33,7 +33,8 @@ Trigger: when a user requests a transfer from his wallet to someone else's.
 
 Additional data:
 - to: the receiver of the transaction;
-- amount: the amount that the receiver should send
+- amount: the amount that the receiver should send;
+- token: the identifier of the token of transaction.
 
 #### savedErc20Transfer
 
