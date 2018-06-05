@@ -1,0 +1,14 @@
+{
+  "name": "event-hub",
+  "version": "1.0.0",
+  "description": "Event hub dependancy for the Forus backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Martijn Doornik",
+  "license": "ISC",
+  "dependencies": {
+    "azure-event-hubs": "^0.2.2"
+  }
+}

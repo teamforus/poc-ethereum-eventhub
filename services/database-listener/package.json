@@ -1,0 +1,15 @@
+{
+  "name": "database-listener",
+  "version": "1.0.0",
+  "description": "Database listener for the service.forus.io event hub",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martijn Doornik",
+  "license": "ISC",
+  "dependencies": {
+    "event-hub": "file:../../lib/event-hub/",
+    "event-list": "file:../../lib/event-list/"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "log-listener",
+  "version": "1.0.0",
+  "description": "This listener logs every event the event hub sends out.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martijn Doornik",
+  "license": "ISC",
+  "dependencies": {
+    "cluster": "^0.7.7",
+    "event-hub": "file:../../lib/event-hub/",
+    "event-list": "file:../../lib/event-list/"
+  }
+}

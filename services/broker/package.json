@@ -1,0 +1,17 @@
+{
+  "name": "broker",
+  "version": "0.0.0",
+  "description": "Broker for the services.forus.io concept. ",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Martijn Doornik",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.5"
+  }
+}
