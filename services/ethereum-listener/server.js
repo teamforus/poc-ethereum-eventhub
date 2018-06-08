@@ -1,4 +1,5 @@
 
+const BigNumber = require('bignumber.js');
 const config = require('./config.json');
 const eventHub = require('event-hub');
 const eventList = require('event-list');
@@ -11,7 +12,9 @@ async function balanceOf(tokenAddress, account) {
         to: tokenAddress,
         data: token.methods.balanceOf(account).encodeABI()
     }).then((balanceHex) => {
-        return parseInt(balanceHex); 
+        console.log('Balance of "' + account + '" = ' + balanceHex);
+        if (balanceHex === '0x') return 0;
+        return BigNumber(balanceHex.toString()); 
     });;
     /*const method = tokenContract.methods.balanceOf(account);
     const balance = await method.call();
@@ -26,22 +29,24 @@ function onEvent(eventName, eventData, time) {
                 const from = eventData[eventDataList.FROM];
                 const to  = eventData[eventDataList.TO];
                 const tokenAddress = eventData[eventDataList.TOKEN];
-                const rawTransaction = eventData['transaction'];
-                balanceOf(tokenAddress, from).then((balance) => {
-                    console.log('Meanwhile... balance = ' + balance);
-                });
+                const transaction = eventData['rawTransaction'];
                 (async () => {
-                    const result = await sendTransaction(tokenAddress, from, to, amount);
                     const previous = {};
                     previous[eventDataList.EVENT_NAME] = eventName;
                     previous[eventDataList.EVENT_DATA] = eventData;
-                    if (result) {
-                        const balance = await balanceOf(tokenAddress, from);
-                        eventData['newBalance'] = balance;
+                    sendTransaction(transaction).then(async (result) => {
+                        /*try {
+                            const balance = await balanceOf(tokenAddress, from);
+                        } catch (error) {
+                            console.log('Error trying to retrieve balance:');
+                            console.error(error);
+                            const balance = -1;
+                        }
+                        eventData['newBalance'] = balance;*/
                         eventHub.send(eventList.ERC20_TRANSFER_EXECUTED, eventData, previous);
-                    } else {
-                        eventHub.send(eventList.ERC20_TRANSFER_FAILED, {}, previous);
-                    }
+                    }).catch((error) => {
+                        eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: error}, previous); 
+                    });
                 })();
                 break;
         }
@@ -78,12 +83,18 @@ function onInput(i) {
             gasPrice: 0,
             data: method.encodeABI()
         };
-        const signature = await web3.eth.accounts.signTransaction(transaction, 'AEC3BD453F2167E1927C794037E6D1F590551C73E2BC77481C8866AB6FF040E0');
-        var data = {};
-        data['rawTransaction'] = signature.rawTransaction;
-        eventHub.send(eventList.ERC20_TRANSFER_REQUEST, data).catch((reason) => {
-            console.log(reason);
-        });
+        (async () => {
+            const signature = await web3.eth.accounts.signTransaction(transaction, 'AEC3BD453F2167E1927C794037E6D1F590551C73E2BC77481C8866AB6FF040E0');
+            var data = {};
+            data['rawTransaction'] = signature.rawTransaction;
+            data[eventDataList.TOKEN] = tokenAddress;
+            data[eventDataList.TO] = to;
+            data[eventDataList.FROM] = from;
+            data[eventDataList.AMOUNT] = amount;
+            eventHub.send(eventList.ERC20_TRANSFER_REQUEST, data).catch((reason) => {
+                console.log(reason);
+            });
+        })();
     } else {
         console.log('Unknown command. Try something that might work.')
     }
