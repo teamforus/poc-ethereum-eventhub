@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "event-hub": "file:../../lib/event-hub/",
-    "event-list": "file:../../lib/event-list/"
+    "event-list": "file:../../lib/event-list/",
+    "sqlite3": "^4.0.0"
   }
 }
