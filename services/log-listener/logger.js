@@ -21,4 +21,7 @@ process.on('message', (event) => {
             (date.getSeconds() < 10? '0' : '') + date.getSeconds() + 
             (date.getMilliseconds() < 10? '0' : '' ) + (date.getMilliseconds() < 100? '0' : '') + date.getMilliseconds() + '-' + name + '.log';
     fs.writeFileSync(directory + file, JSON.stringify(event), 'utf8');
+    console.log(time + 'Received event: ' + name);
+    console.log(time + 'Data: ' + JSON.stringify(data));
+    console.log('');
 })
