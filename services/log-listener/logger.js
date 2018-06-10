@@ -1,7 +1,7 @@
 
 const fs = require('fs');
 
-process.on('message', async (event) => {
+process.on('message', (event) => {
     const name = event.name;
     const data = event.data;
     const time = event.time;
