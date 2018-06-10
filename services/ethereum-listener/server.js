@@ -34,19 +34,32 @@ function onEvent(eventName, eventData, time) {
                     const previous = {};
                     previous[eventDataList.EVENT_NAME] = eventName;
                     previous[eventDataList.EVENT_DATA] = eventData;
-                    sendTransaction(transaction).then(async (result) => {
-                        /*try {
-                            const balance = await balanceOf(tokenAddress, from);
-                        } catch (error) {
-                            console.log('Error trying to retrieve balance:');
-                            console.error(error);
-                            const balance = -1;
+                    const unlocked = await web3.eth.personal.unlockAccount(from, config['web3']['password'], 300);
+                    if (unlocked) {
+                        const tokenContract = setupTokenContract(tokenAddress);
+                        const method = tokenContract.methods.transfer(to, amount);
+                        const transaction = {
+                            from: from,
+                            to: tokenAddress,
+                            chainId: 1492,
+                            gas: 4700000,
+                            gasPrice: 0,
+                            data: method.encodeABI()
+                        };
+                        const receipt = await web3.eth.sendTransaction(transaction);
+                        if (!!receipt && !!receipt.status) {
+                            eventHub.send(eventList.ERC20_TRANSFER_EXECUTED, {transactionHash: receipt.transactionHash}, previous);
+                        } else {
+                            eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: 'failed to make transaction'}, previous);
                         }
-                        eventData['newBalance'] = balance;*/
+                    } else {
+                        eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: 'could not unlock account'}, previous) ;  
+                    }
+                    /*sendTransaction(transaction).then(async (result) => {
                         eventHub.send(eventList.ERC20_TRANSFER_EXECUTED, eventData, previous);
                     }).catch((error) => {
                         eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: error}, previous); 
-                    });
+                    });*/
                 })();
                 break;
         }
