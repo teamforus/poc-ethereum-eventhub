@@ -133,7 +133,7 @@ function onInput(i) {
         data[dataList.TO] = "0x585a36b6a2ae6a0184ea868e3bc0517bf2fd8fa5";
         data[dataList.AMOUNT] = 100;
         data[dataList.TOKEN] =  "0x7fda2776f3106322fa5acc4b85092ce3eea38e1d";
-        data[dataList.SENDER] = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6"
+        data[dataList.FROM] = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6"
         eventHub.send(events.ERC20_TRANSFER_REQUEST, data);
         console.log('Event for test sent... awaiting response.');
     }
