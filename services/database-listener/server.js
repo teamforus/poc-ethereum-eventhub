@@ -5,11 +5,91 @@ const patch = 1;
 const hotfix = 0;
 
 const config = require('./config.json');
-const sqlite3 = require('sqlite3').verbose();
-var database = null;
+var databaseDirectory = null;
 const eventHub = require('event-hub');
 const events = require('event-list');
 const dataList = events.Data;
+const fs = require('fs');
+const tables = require('./directories');
+
+function asureTableExists(table) {
+    directory = databaseDirectory + '/' + table + '/';
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory);
+    }
+    return directory;
+}
+
+function doesExist(table, address) {
+    directory = asureTableExists(table);
+    var fileName = directory + address + '.json'
+    return (fs.existsSync(fileName));
+}
+
+function getTableData(table, address) {
+    if (doesExist(table, address)) {
+        fileName = databaseDirectory + '/' + table + '/' + address + '.json'
+        const file = fs.readFileSync(fileName).toString('utf8');
+        try {
+            return JSON.parse(file);
+        } finally{}
+    }
+    return null;
+}
+
+function getBalance(user, tokenAddress) {
+    try { 
+        user = JSON.parse(user);
+    } catch(error) {
+        if (doesExist(tables.USERS, user)) {
+            user = getTableData(table, user);
+        } else return null;
+    }
+    // User will guarenteed always be a json user object
+    if (!!user['wallets'] && !!user['wallets'][tokenAddress]) {
+        return user.wallet[tokenAddress];
+    }
+    else return 0; //TODO determine if 0 or -1 is required
+}
+
+function handleRequestTransferEvent(data) {
+    const amount = data[dataList.AMOUNT];
+    if (amount <= 0) return 'amount must be greater than 0';
+    const fromAddress = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6";// TODO fix this data[dataList.SENDER];
+    const toAddress = data[dataList.TO];
+    const tokenAddress = data[dataList.TOKEN];
+    var from = getTableData(tables.USERS, fromAddress);
+    var to = getTableData(tables.USERS, toAddress);
+    var token = getTableData(tables.TOKENS, tokenAddress);
+    if (!from) {
+        return 'user does not exists. Cannot transfer from unknown account.' + fromAddress;
+    } else if (!to) {
+        to = {}
+        to['address'] = toAddress;
+    } else if (!token){
+        return 'token does not exist';
+    } 
+    var fromWallet = from['wallet'];
+    if (fromWallet[tokenAddress] < amount) {
+        return 'insufficient funds';
+    }
+    fromWallet[tokenAddress] -= amount;
+    from['wallet'] = fromWallet;
+    var toWallet = to['wallet'];
+    if (!!toWallet) {
+        toWallet[tokenAddress] = (!!toWallet[tokenAddress] ? toWallet[tokenAddress] + amount : amount);
+    } else {
+        toWallet = {};
+        toWallet[tokenAddress] = amount;
+    }
+    to['wallet'] = toWallet;
+    if (saveUser(from)) {
+        if (saveUser(to)) {
+            return true;
+        }
+    }
+    return 'could not save user';
+}
 
 function onEvent(eventName, eventData, time) {
     try {
@@ -19,10 +99,10 @@ function onEvent(eventName, eventData, time) {
                 const previous = {};
                 previous[dataList.EVENT_DATA] = eventData;
                 previous[dataList.EVENT_NAME] = events.ERC20_TRANSFER_REQUEST;
-                if (!!success) {
+                if (success === true) {
                     eventHub.send(events.ERC20_TRANSFER_SAVED, eventData, previous);
                 } else {
-                    eventHub.send(events.ERC20_TRANSFER_FAILED, null, previous);
+                    eventHub.send(events.ERC20_TRANSFER_FAILED, {message: success},  previous);
                 }
                 break;
             case events.ERC20_TRANSFER_SAVED: 
@@ -50,9 +130,10 @@ function onInput(i) {
     } else if (input === 'test') {
         console.log('Test started...');
         const data = {};
-        data[dataList.TO] = 103;
-        data[dataList.AMOUNT] = 101;
-        data[dataList.TOKEN] = 201;
+        data[dataList.TO] = "0x585a36b6a2ae6a0184ea868e3bc0517bf2fd8fa5";
+        data[dataList.AMOUNT] = 100;
+        data[dataList.TOKEN] =  "0x7fda2776f3106322fa5acc4b85092ce3eea38e1d";
+        data[dataList.SENDER] = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6"
         eventHub.send(events.ERC20_TRANSFER_REQUEST, data);
         console.log('Event for test sent... awaiting response.');
     }
@@ -66,63 +147,24 @@ function onInput(i) {
     }
 }
 
-function handleRequestTransferEvent(data) {
-    const fromToken = data[dataList.SENDER];
-    const toId = data[dataList.TO];
-    const amount = data[dataList.AMOUNT];
-    const tokenId = data[dataList.TOKEN];
-    var from = null;
-    var to = null;
-    var token = null;
-    database.each('SELECT * from `user` WHERE `token` = ? OR `id` = ?', [fromToken, toId], (err, row) => {
-          if (row.id === toId) to = row;
-          else if (row.token === fromToken) from = row; 
-    });
-    database().get('SELECT * FROM `token` WHERE `id` = ?', [tokenId], (error, row) => {
-        token = row;
-    });
-    if (!!from && !!to && !!token && amount > 0) {
-        var wallet = database().queryFirstRow('SELECT * FROM `wallet` WHERE `user_id` = ?', from.id);
-        if (!!wallet && wallet.amount >= amount) {
-            wallet.amount -= amount;
-            database().update('wallet', {
-                id: wallet.id
-            }, {
-                amount: wallet.amount
-            });
-            wallet = database().queryFirstRow('SELECT * FROM `wallet` WHERE `user_id` = ?', to.id);
-            if (!!wallet) {
-                database().update('wallet', {
-                    id: wallet.id
-                }, {
-                    amount: wallet.amount
-                });
-            } else {
-                database().insert('wallet', {
-                    user_id: to.id,
-                    amount: amount,
-                    token_id: tokenId
-                });
-            }
+function saveUser(userJson) {
+    if (!!userJson.address) {
+        try {
+            const directory = asureTableExists(tables.USERS);
+            fs.writeFileSync(directory + userJson.address + '.json', JSON.stringify(userJson), 'utf8');
             return true;
-        }
-    }
+        } catch (error) {}
+    } 
     return false;
 }
 
 function setupDatabase(config) {
-    const filename = __dirname + '/database.sql';
-    const fs = require('fs');
-    const exists = fs.existsSync(filename)
-    database = new sqlite3.Database(filename);
-    database.serialize(() => {
-        if (!exists) {
-            const migrationFileName = __dirname + '/migrations/001-init.sql';
-            fs.readFile(migrationFileName, 'utf8', (err, data) => {
-                database.run(data);
-            });
-        }
-    });
+    try {
+        databaseDirectory = __dirname + '/' + config['database']['directory'];
+        if (!fs.existsSync(databaseDirectory)) fs.mkdirSync(databaseDirectory);
+    } catch(error) {
+        throw error;
+    }
 }
 
 // Start actual process

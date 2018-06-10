@@ -4,3 +4,4 @@ logs/
 .last
 config.json
 database.sql
+database/
