@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "cluster": "^0.7.7",
-    "event-hub": "file:../../lib/event-hub/",
-    "event-list": "file:../../lib/event-list/"
+    "event-hub": "git://github.com/teamforus/rd-ethereum-eventhub-azure.git#master",
+    "event-list": "git://github.com/teamforus/rd-ethereum-eventhub-list.git#master"
   }
 }
