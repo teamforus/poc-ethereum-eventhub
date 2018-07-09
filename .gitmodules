@@ -1,0 +1,6 @@
+[submodule "lib/azure"]
+	path = lib/azure
+	url = https://github.com/teamforus/rd-ethereum-eventhub-azure
+[submodule "lib/event-list"]
+	path = lib/event-list
+	url = https://github.com/teamforus/rd-ethereum-eventhub-list
