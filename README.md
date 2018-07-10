@@ -1,3 +1,7 @@
+**note:** work in progress, beware of the dragons 🐉 
+
+**This repository is maintained by:** [@martijndoornik](https://github.com/martijndoornik)
+
 # Event-driven Platform Forus Concept
 
 This project is build as an aid to show the advantages of event-driven services API. 
