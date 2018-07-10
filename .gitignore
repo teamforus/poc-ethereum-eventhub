@@ -2,6 +2,7 @@ node_modules/
 logs/
 .log
 .last
+build/
 config.json
 database.sql
 database/

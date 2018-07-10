@@ -1,9 +1,4 @@
 
-const listenerId = 'database-listener';
-const release = 0;
-const patch = 1;
-const hotfix = 0;
-
 const config = require('./config.json');
 var databaseDirectory = null;
 const eventHub = require('event-hub');
@@ -55,7 +50,7 @@ function getBalance(user, tokenAddress) {
 function handleRequestTransferEvent(data) {
     const amount = data[dataList.AMOUNT];
     if (amount <= 0) return 'amount must be greater than 0';
-    const fromAddress = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6";// TODO fix this data[dataList.SENDER];
+    const fromAddress = data[dataList.FROM];
     const toAddress = data[dataList.TO];
     const tokenAddress = data[dataList.TOKEN];
     var from = getTableData(tables.USERS, fromAddress);
@@ -105,12 +100,6 @@ function onEvent(eventName, eventData, time) {
                     eventHub.send(events.ERC20_TRANSFER_FAILED, {message: success},  previous);
                 }
                 break;
-            case events.ERC20_TRANSFER_SAVED: 
-                console.log("Test was successful!");
-                break;
-            case events.ERC20_TRANSFER_FAILED:
-                console.log("Test failed");
-                break;
         }
     } catch (error) {
         console.log(error);
@@ -126,22 +115,7 @@ function onInput(i) {
         console.log('Stopping server...');
         eventHub.stop();
         console.log('Server shut down. Have a nice day :)');
-        throw 'This should be done neater, but the server is now closed.'
-    } else if (input === 'test') {
-        console.log('Test started...');
-        const data = {};
-        data[dataList.TO] = "0x585a36b6a2ae6a0184ea868e3bc0517bf2fd8fa5";
-        data[dataList.AMOUNT] = 100;
-        data[dataList.TOKEN] =  "0x7fda2776f3106322fa5acc4b85092ce3eea38e1d";
-        data[dataList.FROM] = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6"
-        eventHub.send(events.ERC20_TRANSFER_REQUEST, data);
-        console.log('Event for test sent... awaiting response.');
-    }
-    else if (input === 'version') {
-        console.log('Sending event to hub...')
-        eventHub.send(events.VERSION_REQUEST).catch((reason) => {
-            console.log(reason);
-        });
+        throw 'This should be done neater, but the server is now closed.';
     } else {
         console.log('Unknown command. Try something that might work.');
     }

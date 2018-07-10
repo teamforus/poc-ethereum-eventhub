@@ -25,41 +25,17 @@ function onEvent(eventName, eventData, time) {
     try {
         switch (eventName) {
             case eventList.ERC20_TRANSFER_REQUEST:
-                const amount = eventData[eventDataList.AMOUNT];
-                const from = eventData[eventDataList.FROM];
-                const to  = eventData[eventDataList.TO];
-                const tokenAddress = eventData[eventDataList.TOKEN];
                 const transaction = eventData['rawTransaction'];
                 (async () => {
                     const previous = {};
                     previous[eventDataList.EVENT_NAME] = eventName;
                     previous[eventDataList.EVENT_DATA] = eventData;
-                    const unlocked = await web3.eth.personal.unlockAccount(from, config['web3']['password'], 300);
-                    if (unlocked) {
-                        const tokenContract = setupTokenContract(tokenAddress);
-                        const method = tokenContract.methods.transfer(to, amount);
-                        const transaction = {
-                            from: from,
-                            to: tokenAddress,
-                            chainId: 1492,
-                            gas: 4700000,
-                            gasPrice: 0,
-                            data: method.encodeABI()
-                        };
-                        const receipt = await web3.eth.sendTransaction(transaction);
-                        if (!!receipt && !!receipt.status) {
-                            eventHub.send(eventList.ERC20_TRANSFER_EXECUTED, {transactionHash: receipt.transactionHash}, previous);
-                        } else {
-                            eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: 'failed to make transaction'}, previous);
-                        }
+                    const receipt = await web3.eth.sendSignedTransaction(transaction);
+                    if (!!receipt && !!receipt.status) {
+                        eventHub.send(eventList.ERC20_TRANSFER_EXECUTED, {transactionHash: receipt.transactionHash}, previous);
                     } else {
-                        eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: 'could not unlock account'}, previous) ;  
+                        eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: 'failed to make transaction'}, previous);
                     }
-                    /*sendTransaction(transaction).then(async (result) => {
-                        eventHub.send(eventList.ERC20_TRANSFER_EXECUTED, eventData, previous);
-                    }).catch((error) => {
-                        eventHub.send(eventList.ERC20_TRANSFER_FAILED, {message: error}, previous); 
-                    });*/
                 })();
                 break;
         }
@@ -78,36 +54,6 @@ function onInput(i) {
         eventHub.stop();
         console.log('Server shut down. Have a nice day :)');
         throw 'This should be done neater, but the server is now closed.'
-    }
-    else if (input === 'test') {
-        console.log('Sending event to hub...');
-        const amount = 100;
-        const from = "0xb8918494b24862b2b9dc7cc2c3e9a41893d8d4b6" 
-        const to = "0x585a36b6a2ae6a0184ea868e3bc0517bf2fd8fa5";
-        const tokenAddress = "0x7fda2776f3106322fa5acc4b85092ce3eea38e1d";
-
-        const tokenContract = setupTokenContract(tokenAddress);
-        const method = tokenContract.methods.transfer(to, amount);
-        const transaction = {
-            from: from,
-            to: tokenAddress,
-            chainId: 1492,
-            gas: 4700000,
-            gasPrice: 0,
-            data: method.encodeABI()
-        };
-        (async () => {
-            const signature = await web3.eth.accounts.signTransaction(transaction, 'AEC3BD453F2167E1927C794037E6D1F590551C73E2BC77481C8866AB6FF040E0');
-            var data = {};
-            data['rawTransaction'] = signature.rawTransaction;
-            data[eventDataList.TOKEN] = tokenAddress;
-            data[eventDataList.TO] = to;
-            data[eventDataList.FROM] = from;
-            data[eventDataList.AMOUNT] = amount;
-            eventHub.send(eventList.ERC20_TRANSFER_REQUEST, data).catch((reason) => {
-                console.log(reason);
-            });
-        })();
     } else {
         console.log('Unknown command. Try something that might work.')
     }
@@ -126,15 +72,6 @@ function setupWeb3(config) {
     const Web3 = require('web3');
     web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(web3ConnectionString));
-}
-
-async function sendTransaction(rawTransaction) {
-    try {
-        const result = await web3.eth.sendSignedTransaction(rawTransaction);
-        return result.status;
-    } catch (error) {
-        console.log(error);
-    }
 }
 
 // Start actual process
