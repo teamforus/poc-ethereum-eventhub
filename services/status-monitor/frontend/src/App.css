@@ -1,0 +1,31 @@
+
+html {
+    background: #DDDDDD
+}
+
+.body {
+    color: #011d4d;
+    width:94%;
+    margin: 0 3%;
+}
+
+.header-message {
+    position: absolute;
+    top: 0;
+    left:0;
+    right: 0;
+    width: auto;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    line-height: 40px;
+}
+
+.header-message.warning {
+    background-color: rgba(197, 176, 19, 0.7);
+}
+
+.header-message.error {
+    background-color: rgba(255,0,0, 0.7);
+}

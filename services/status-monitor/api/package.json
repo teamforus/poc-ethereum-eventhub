@@ -1,0 +1,17 @@
+{
+  "name": "status-monitor-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martijn Doornik",
+  "license": "ISC",
+  "dependencies": {
+    "event-hub": "git://github.com/teamforus/rd-ethereum-eventhub-azure.git#master",
+    "event-list": "git://github.com/teamforus/rd-ethereum-eventhub-list.git#master",
+    "http": "0.0.0",
+    "websocket": "^1.0.26"
+  }
+}

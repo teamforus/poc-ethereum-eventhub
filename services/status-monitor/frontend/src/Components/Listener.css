@@ -1,0 +1,21 @@
+
+.listener {
+    color: white;
+    display: inline-block;
+    width: 29%;
+    margin: 0 1%;
+    padding: 1%;
+    height: 300px;      
+}
+
+.listener.green {
+    background-color: #449944;
+}
+
+.listener.red {
+    background-color: #AA4444;
+}
+
+.listener.grey {
+    background-color: #AAAAAA;
+}
