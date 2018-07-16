@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
 
 html {
     background: #DDDDDD
@@ -5,6 +6,7 @@ html {
 
 .body {
     color: #011d4d;
+    font-family: 'Montserrat', sans-serif;
     width:94%;
     margin: 0 3%;
 }
@@ -28,4 +30,26 @@ html {
 
 .header-message.error {
     background-color: rgba(255,0,0, 0.7);
+}
+
+.controls {
+    position: absolute;
+    width:auto;
+    right: 0;
+    bottom: 0;
+
+}
+
+.controls .button {
+    display:inline-block;
+    text-align: center;
+    margin: 0 1px;
+}
+
+.controls .button span {
+    cursor: pointer;
+    line-height: 40px;
+    background-color: #888888;
+    color: #FFFFFF;
+    width:40px;
 }
