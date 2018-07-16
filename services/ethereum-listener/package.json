@@ -10,8 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "bignumber.js": "^7.2.1",
-    "event-hub": "git://github.com/teamforus/rd-ethereum-eventhub-azure.git#master",
+    "event-hub": "git://github.com/teamforus/rd-ethereum-eventhub-azure.git#improved-debugging",
     "event-list": "git://github.com/teamforus/rd-ethereum-eventhub-list.git#master",
-    "web3": "^1.0.0-beta.34"
+    "web3": "^1.0.0-beta2"
   }
 }

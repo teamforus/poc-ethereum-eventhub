@@ -9,7 +9,7 @@
   "author": "Martijn Doornik",
   "license": "ISC",
   "dependencies": {
-    "event-hub": "git://github.com/teamforus/rd-ethereum-eventhub-azure.git#master",
+    "event-hub": "git://github.com/teamforus/rd-ethereum-eventhub-azure.git#improved-debugging",
     "event-list": "git://github.com/teamforus/rd-ethereum-eventhub-list.git#master",
     "http": "0.0.0",
     "websocket": "^1.0.26"

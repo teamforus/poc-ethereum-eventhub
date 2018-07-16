@@ -9,7 +9,7 @@ class Listener extends Component {
       'listener': true,
       'green': this.props.listener.status === 'OK',
       'red': this.props.listener.status === 'ERROR',
-      'grey': this.props.listener.status === 'OFF'
+      'grey': this.props.listener.status === 'OFFLINE'
     };
     Object.keys(classNames).forEach((name) => {
       if (!!classNames[name]) ret.push(name);
@@ -20,7 +20,12 @@ class Listener extends Component {
   render() {
     return (
       <div className={this.className()}>
-        {this.props.listener.name}
+        <div className="name">
+          {this.props.listener.name}
+        </div>
+        <div className="version">
+          Version
+        </div>
       </div>
     );
   }
